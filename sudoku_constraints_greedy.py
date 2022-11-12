@@ -20,7 +20,7 @@ class SudokuConstraintsGreedy(SudokuConstraints):
         for r in range(9):
             for c in range(9):
                 if self.get(r, c) is None:
-                    val = self.get_possible_values_for(r, c)
+                    val = self._get_possible_values_for(r, c)
                     if len(val) < min_val:
                         min_val = len(val)
                         min_out = (r, c)
@@ -39,7 +39,7 @@ class SudokuConstraintsGreedy(SudokuConstraints):
 
         r, c = next_step[1]
 
-        choices = self.get_possible_values_for(r, c)
+        choices = self._get_possible_values_for(r, c)
         for i in choices:
             self.set(r, c, i)
             if self.solve():

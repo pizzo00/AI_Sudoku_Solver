@@ -2,12 +2,13 @@ from time import process_time
 
 from sudoku_constraints import SudokuConstraints
 from sudoku_constraints_greedy import SudokuConstraintsGreedy
+from sudoku_genetic import SudokuGenetic
 
 
 def main():
     # s = SudokuConstraintsGreedy(".62..417.84..1.........5.8......8..5....2.7.....9....42..67....4....1....175.26..")
     # s = SudokuConstraintsGreedy(".2....5938..5..46.94..6...8..2.3.....6..8.73.7..2.........4.38..7....6..........5")
-    s = SudokuConstraintsGreedy("3...8.......7....51..............36...2..4....7...........6.13..452...........8..")
+    s = SudokuGenetic("3...8.......7....51..............36...2..4....7...........6.13..452...........8..")
 
     print("\n")
     # Print initial sudoku

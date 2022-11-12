@@ -16,14 +16,14 @@ class SudokuConstraints(Sudoku):
 
         # Unset old constraints
         if self.data[r][c] is not None:
-            self.set_constraint(r, c, self.data[r][c], False)
+            self.__set_constraint(r, c, self.data[r][c], False)
         # Set new constraints
         if val is not None:
-            self.set_constraint(r, c, val, True)
+            self.__set_constraint(r, c, val, True)
 
         super().set(r, c, val)
 
-    def get_possible_values_for(self, r: int, c: int) -> Set[int]:
+    def _get_possible_values_for(self, r: int, c: int) -> Set[int]:
         out = set()
         for i in range(9):
             if self.__constraints[r][c][i] == 0:
@@ -31,7 +31,7 @@ class SudokuConstraints(Sudoku):
 
         return out
 
-    def set_constraint(self, row: int, col: int, val: int, insert: bool) -> None:
+    def __set_constraint(self, row: int, col: int, val: int, insert: bool) -> None:
         inc = 1 if insert else -1
 
         # Row - Col
@@ -61,7 +61,7 @@ class SudokuConstraints(Sudoku):
                 # Fixed number
                 return func(next_r, next_c)
             else:
-                choices = self.get_possible_values_for(r, c)
+                choices = self._get_possible_values_for(r, c)
                 for i in choices:
                     self.set(r, c, i)
                     if func(next_r, next_c):

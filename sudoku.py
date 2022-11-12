@@ -3,6 +3,15 @@ from typing import Optional, List, Set, Tuple
 
 
 class Sudoku:
+    class _NineChecker:
+        def __init__(self):
+            self.digits = [False for _ in range(9)]
+
+        def set(self, digit: int):
+            self.digits[digit - 1] = True
+
+        def is_correct(self) -> bool:
+            return not (False in self.digits)
 
     __stripValues = [' ', '\n', '\r', '\t']
     __acceptedValue = {str(i): i for i in range(1, 10)}
@@ -49,16 +58,6 @@ class Sudoku:
         self.data[r][c] = val
 
     def is_correct(self) -> bool:
-        class NineChecker:
-            def __init__(self):
-                self.digits = [False for _ in range(9)]
-
-            def set(self, digit: int):
-                self.digits[digit-1] = True
-
-            def is_correct(self) -> bool:
-                return not (False in self.digits)
-
         # Check void positions
         for r in range(9):
             for c in range(9):
@@ -67,7 +66,7 @@ class Sudoku:
 
         # Check rows
         for r in range(9):
-            nc = NineChecker()
+            nc = Sudoku._NineChecker()
             for c in range(9):
                 nc.set(self.get(r, c))
             if not nc.is_correct():
@@ -75,7 +74,7 @@ class Sudoku:
 
         # Check cols
         for c in range(9):
-            nc = NineChecker()
+            nc = Sudoku._NineChecker()
             for r in range(9):
                 nc.set(self.get(r, c))
             if not nc.is_correct():
@@ -84,7 +83,7 @@ class Sudoku:
         # Check squares
         for sr in range(3):  # square row
             for sc in range(3):  # square column
-                nc = NineChecker()
+                nc = Sudoku._NineChecker()
                 for r in range(sr*3, sr*3 + 3):
                     for c in range(sc*3, sc*3 + 3):
                         nc.set(self.get(r, c))
