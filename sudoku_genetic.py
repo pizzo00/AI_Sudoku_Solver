@@ -1,3 +1,4 @@
+import sys
 from typing import Optional, List, Set, Tuple
 
 from sudoku import Sudoku

@@ -5,26 +5,27 @@ from typing import Optional, List, Set, Tuple
 class Sudoku:
 
     __stripValues = [' ', '\n', '\r', '\t']
-    __acceptedValue = {str(i):i for i in range(1, 10)}
+    __acceptedValue = {str(i): i for i in range(1, 10)}
 
-    def __init__(self):
-        print("Please insert sudoku:\n")
-        r = 0
-        c = 0
+    def __init__(self, str_input: Optional[str] = None, **kwargs):
+        if str_input is None:
+            print("Please insert sudoku:\n")
+            # char = sys.stdin.read(1) - Do not work for some reason
+            str_input = ""
+            while len(str_input) < 9*9:
+                str_input += sys.stdin.readline()
+                # Removed unwanted chars
+                str_input = ''.join([c for c in str_input if c not in self.__stripValues])
 
         self.data: List[List[Optional[int]]] = [[None for _ in range(9)] for _ in range(9)]
 
-        # char = sys.stdin.read(1) - Do not work for some reason
-        user_input = ""
-        while len(user_input) < 9*9:
-            user_input += sys.stdin.readline()
-            # Removed unwanted chars
-            user_input = ''.join([c for c in user_input if c not in self.__stripValues])
-
+        r = 0
+        c = 0
         i = 0
         while r < 9:
-            char = user_input[i]
+            char = str_input[i]
 
+            # TODO think about unsafe init with kwargs
             if char in self.__acceptedValue:
                 self.set(r, c, self.__acceptedValue[char])
             else:
@@ -92,6 +93,9 @@ class Sudoku:
 
         return True
 
+    def solve(self) -> bool:
+        raise NotImplementedError("No solver provided in Baseclass")
+
     def __str__(self):
         out = "+---+---+---+\n"
         for r in range(9):
@@ -105,14 +109,9 @@ class Sudoku:
                 out += "+---+---+---+\n"
         return out
 
-    def __str2__(self):
+    def __repr__(self):
         out = ""
         for r in range(9):
             for c in range(9):
                 out += str(self.get(r, c) or ".")
-                if (c+1) % 3 == 0:
-                    out += " "
-            out += "\n"
-            if (r+1) % 3 == 0:
-                out += "\n"
         return out

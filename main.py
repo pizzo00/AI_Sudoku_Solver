@@ -1,39 +1,30 @@
+from time import process_time
+
 from sudoku_constraints import SudokuConstraints
-
-
-def solve(s: SudokuConstraints, r: int, c: int) -> bool:
-    if r == 9:
-        return True  # Reach bottom of recursion
-
-    next_r, next_c = SudokuConstraints.inc_row_col(r, c)
-    if s.get(r, c) is not None:
-        # Fixed number
-        return solve(s, next_r, next_c)
-    else:
-        choices = s.get_possible_values_for(r, c)
-        for i in choices:
-            s.set(r, c, i)
-            if solve(s, next_r, next_c):
-                return True
-        s.set(r, c, None)
-
-    return False  # Unsolvable
+from sudoku_constraints_greedy import SudokuConstraintsGreedy
 
 
 def main():
-    s = SudokuConstraints()
+    # s = SudokuConstraintsGreedy(".62..417.84..1.........5.8......8..5....2.7.....9....42..67....4....1....175.26..")
+    # s = SudokuConstraintsGreedy(".2....5938..5..46.94..6...8..2.3.....6..8.73.7..2.........4.38..7....6..........5")
+    s = SudokuConstraintsGreedy("3...8.......7....51..............36...2..4....7...........6.13..452...........8..")
 
     print("\n")
     # Print initial sudoku
     print(str(s))
-    print("-------------------------------------------\n")
+    print("------------------\n")
 
-    if solve(s, 0, 0):
-        print("Solved")
+    start_time = process_time()
+    res = s.solve()
+    end_time = process_time()
+
+    if res:
         # Print result
         print(str(s))
+        print("Solved in ", end_time-start_time, "s")
         # Check correctness (ideally redundant)
-        print("Correct" if s.is_correct() else "ATTENTION SUDOKU NOT CORRECT!")
+        if not s.is_correct():
+            print("ATTENTION SUDOKU NOT CORRECT!")
     else:
         print("Unsolvable")
 
