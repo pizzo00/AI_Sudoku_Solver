@@ -1,8 +1,14 @@
+import copy
 import math
 import random
 from typing import Optional, List, Set, Tuple
 
 from sudoku import Sudoku
+
+TOP_N = 100  # 250
+INITIAL_COMBINATION_RATE = 98 / 100
+INITIAL_MUTATION_RATE = 1 / 100
+MUTATION_RATE_INC = 5 # / 1000  # 0.5%
 
 
 class SudokuGenetic(Sudoku):
@@ -10,10 +16,11 @@ class SudokuGenetic(Sudoku):
         def rank(self) -> int:
             return self.digits.count(False)
 
-    __top_n = 80
+    __mutation_rate = INITIAL_MUTATION_RATE
+    __combination_rate = INITIAL_COMBINATION_RATE
 
-    def __init__(self, str_input: Optional[str] = None, initial_sudoku: Optional['SudokuGenetic'] = None):
-        super().__init__(str_input)
+    def __init__(self, str_input: Optional[str] = None, initial_sudoku: Optional['SudokuGenetic'] = None, **kwargs):
+        super().__init__(str_input, **kwargs)
 
         self.__rank: Optional[int] = None
         self.initial_sudoku = initial_sudoku
@@ -31,7 +38,8 @@ class SudokuGenetic(Sudoku):
         return self.initial_sudoku.__is_fixed_position(r, c)
 
     def __clone(self) -> 'SudokuGenetic':
-        return SudokuGenetic(repr(self), self.initial_sudoku or self)
+        # return SudokuGenetic(repr(self), self.initial_sudoku or self)
+        return SudokuGenetic(None, self.initial_sudoku or self, unsafe_init=copy.deepcopy(self.data))
 
     def __rank_solution(self) -> int:
         if self.__rank is not None:
@@ -76,30 +84,46 @@ class SudokuGenetic(Sudoku):
     def __generate(self, partner: 'SudokuGenetic') -> List['SudokuGenetic']:
         split = (9*9) // 2
 
-        split = random.randrange(15, 65)
-        out = [self.initial_sudoku.__clone(), self.initial_sudoku.__clone()]
-        for r in range(9):
-            for c in range(9):
-                if not self.__is_fixed_position(r, c):
-                    if r*9 + c < split:
-                        out[0].set(r, c, self.get(r, c))
-                        out[1].set(r, c, partner.get(r, c))
-                    else:
-                        out[0].set(r, c, partner.get(r, c))
-                        out[1].set(r, c, self.get(r, c))
+        split = random.randrange(10, 70)
+        out = [self.__clone(), partner.__clone()]
+
+        if random.random() < self.initial_sudoku.__combination_rate:
+            for r in range(9):
+                for c in range(9):
+                    if not self.__is_fixed_position(r, c):
+                        if random.random() < self.initial_sudoku.__mutation_rate:
+                            out[0].set(r, c, random.randrange(1, 10))
+                            out[1].set(r, c, random.randrange(1, 10))
+                        else:
+                            if r*9 + c < split:
+                                out[0].set(r, c, partner.get(r, c))
+                                out[1].set(r, c, self.get(r, c))
         return out
 
     def solve(self):
-        top_n = self.__top_n
-        gen = self.__get_first_gen(top_n * (top_n-1) // 2)
+        top_n = TOP_N
+        gen = self.__get_first_gen(top_n * (top_n-1))
         gen.sort(key=lambda x: x.__rank_solution())
 
+        last_rank = 10000000
+        rank_age = 0
         while gen[0].__rank_solution() != 0:
-            print(gen[0].__rank_solution())
+            cur_rank = gen[0].__rank_solution()
+            if cur_rank == last_rank:
+                rank_age += 1
+                self.__mutation_rate += MUTATION_RATE_INC
+            else:
+                self.__mutation_rate = INITIAL_MUTATION_RATE
+                self.__combination_rate = INITIAL_COMBINATION_RATE
+                rank_age = 0
+            if rank_age > 5:
+                self.__combination_rate = 1
+            last_rank = cur_rank
+
+            print(str(cur_rank) + " - " + str(self.__mutation_rate*100) + "%")
             print("\n")
 
             gen = gen[0:top_n]
-            random.shuffle(gen)  # TODO maybe I should remove it
 
             new_gen = []
             for i in range(0, top_n):
@@ -108,5 +132,6 @@ class SudokuGenetic(Sudoku):
             gen = new_gen
             gen.sort(key=lambda x: x.__rank_solution())
 
-        return gen[0]  # I Won
+        self.data = gen[0].data  # I Won
+        return True
 
