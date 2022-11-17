@@ -92,7 +92,7 @@ class SudokuGenetic(Sudoku):
                     d += 1
         return out
 
-    def __get_parent(self, candidates: List['SudokuGenetic']):
+    def __get_parent(self, candidates: List['SudokuGenetic']) -> 'SudokuGenetic':
         i1 = random.randrange(0, CANDIDATE_N)
         i2 = random.randrange(0, CANDIDATE_N)
         while i1 == i2:
@@ -170,6 +170,7 @@ class SudokuGenetic(Sudoku):
             new_gen = gen[0:ELITE_N]
             candidates = gen[0:CANDIDATE_N]
 
+            # generate others
             num_of_mutations = 0
             successful_mutations = 0
             while len(new_gen) < GEN_N:
@@ -206,6 +207,7 @@ class SudokuGenetic(Sudoku):
             else:
                 self.__mutation_rate *= 2
 
-        self.data = gen[0].data  # I Won
-        return True
+        # copy data to self in order to return result
+        self.data = gen[0].data
+        return True  # solution found
 
