@@ -1,6 +1,9 @@
 import sys
 from typing import Optional, List, Set, Tuple
 
+STRIP_VALUES = [' ', '\n', '\r', '\t']
+ACCEPTED_VALUES = {str(i): i for i in range(1, 10)}
+
 
 class Sudoku:
     class _NineChecker:
@@ -13,35 +16,34 @@ class Sudoku:
         def is_correct(self) -> bool:
             return not (False in self.digits)
 
-    __stripValues = [' ', '\n', '\r', '\t']
-    __acceptedValue = {str(i): i for i in range(1, 10)}
-
     def __init__(self, str_input: Optional[str] = None, **kwargs):
-        if str_input is None:
-            print("Please insert sudoku:\n")
-            # char = sys.stdin.read(1) - Do not work for some reason
-            str_input = ""
-            while len(str_input) < 9*9:
-                str_input += sys.stdin.readline()
-                # Removed unwanted chars
-                str_input = ''.join([c for c in str_input if c not in self.__stripValues])
+        if 'unsafe_init' in kwargs:
+            self.data = kwargs['unsafe_init']
+        else:
+            if str_input is None:
+                print("Please insert sudoku:\n")
+                # char = sys.stdin.read(1) - Do not work for some reason
+                str_input = ""
+                while len(str_input) < 9*9:
+                    str_input += sys.stdin.readline()
+                    # Removed unwanted chars
+                    str_input = ''.join([c for c in str_input if c not in STRIP_VALUES])
 
-        self.data: List[List[Optional[int]]] = [[None for _ in range(9)] for _ in range(9)]
+            self.data: List[List[Optional[int]]] = [[None for _ in range(9)] for _ in range(9)]
 
-        r = 0
-        c = 0
-        i = 0
-        while r < 9:
-            char = str_input[i]
+            r = 0
+            c = 0
+            i = 0
+            while r < 9:
+                char = str_input[i]
 
-            # TODO think about unsafe init with kwargs
-            if char in self.__acceptedValue:
-                self.set(r, c, self.__acceptedValue[char])
-            else:
-                self.set(r, c, None)
+                if char in ACCEPTED_VALUES:
+                    self.set(r, c, ACCEPTED_VALUES[char])
+                else:
+                    self.set(r, c, None)
 
-            i += 1
-            r, c = self.inc_row_col(r, c)
+                i += 1
+                r, c = self.inc_row_col(r, c)
 
     @staticmethod
     def inc_row_col(r, c) -> Tuple[int, int]:
